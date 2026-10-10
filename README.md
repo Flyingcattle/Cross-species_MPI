@@ -1,0 +1,1 @@
+This repository contains the main codes used in the manuscript entitled "Conserved developmental programs and human-biased transcriptome remodeling during mammalian oocyte meiotic prophase I" by Ge et al.
