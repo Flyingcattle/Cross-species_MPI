@@ -42,19 +42,16 @@ DimPlot(combined, reduction = "umap", label=T,group.by = "celltype_myTAI")
 ###########################################################################################################   
 
 seu<-cell_total
-# 提取原始counts矩阵（稀疏矩阵格式，dgCMatrix）
 Human_counts <- seu@assays$RNA@counts
 Human_counts[1:5, 1:5]
 
-# 提取meta信息（默认包含细胞ID和注释，需确保有细胞类型列，如"celltype"）
 Human_meta_data <- seu@meta.data
 
-# 提取行名作为CELL列，同时保留celltype3列并命名为CELL_TYPE
 meta <- data.frame(
-  CELL = rownames(Human_meta_data),  # 行名转为第一列CELL
-  CELL_TYPE = Human_meta_data$celltype_myTAI,  # 提取celltype3列并命名为CELL_TYPE
-  check.names = FALSE,  # 避免列名自动调整
-  stringsAsFactors = FALSE  # 确保字符不被转为因子
+  CELL = rownames(Human_meta_data), 
+  CELL_TYPE = Human_meta_data$celltype_myTAI,  
+  check.names = FALSE,  
+  stringsAsFactors = FALSE 
 )
 head(meta)
 Human_meta_data<-meta
@@ -85,12 +82,11 @@ Human_gathered %>%
   ggplot(aes(CELL_TYPE, MEAN, fill = CELL_TYPE)) +
   geom_boxplot(notch = T) +
   theme_cowplot()  +
-  # 关键：用levels()提取因子的原始顺序作为标签
   scale_x_discrete(labels = levels(Human_gathered$CELL_TYPE)) +
   theme(
     legend.position = "none",
     axis.title.x = element_blank(),
-    axis.text.x = element_text(angle = 45, hjust = 1)  # 旋转标签避免重叠
+    axis.text.x = element_text(angle = 45, hjust = 1)  
   ) +
   ylab("pLI percentile") + scale_y_continuous(limits = c(32, 45))
 

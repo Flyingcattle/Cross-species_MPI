@@ -8,7 +8,6 @@ library(Seurat)
 Human_PSG <- readRDS(file="E:/Lab of Germ Cell Bio/10xGenomics_species/1.All_species_Seurat/Figure3/Pleiotropy/Human.tau_genesymbol.rds")
 head(Human_PSG)
 
-
 ###########################################################################################################   
 #################################### load Seurat object ##############################
 cell_total<-readRDS(file = "E:/Lab of Germ Cell Bio/10xGenomics_species/1.All_species_Seurat/Figure2/germ_sub_updated.rds")
@@ -22,45 +21,31 @@ DimPlot(cell_total, cols = my_color3,
         reduction = "umap", label = T, group.by = "celltype")
 table(cell_total@meta.data$celltype)
 table(cell_total@meta.data$species)
-# 细胞类型顺序
 celltype_order <- c("Mito", "Pre_L", "Lepto", "Zygot", "Pachy", "Diplo", "Dicty")
-# 去掉 NC_xxx
 cell_total$celltype <- gsub("^NC_(6|7|8|14)$", "NC", cell_total$celltype)
-
-#cell_total <- subset(cell_total, subset = species == "human" & celltype %in% celltype_order)
 cell_total <- subset(x = cell_total,subset = celltype != "NC")  # 筛选 celltype 列中不等于 NC 的细胞
-
 table(cell_total$celltype)
 
 ###########################################################################################################   
 #################################### load Seurat object ##############################
 ###############################################
-### 2. 提取 Seurat 数据
-###############################################
 seu <- cell_total
-
-# Counts matrix
 Human_counts <- seu@assays$RNA@counts
-
-# meta 信息：CELL + CELL_TYPE
 Human_meta_data <- data.frame(
   CELL = rownames(seu@meta.data),
   CELL_TYPE = seu@meta.data$celltype,
   check.names = FALSE,
   stringsAsFactors = FALSE
 )
-
-###############################################
-### 3. 数据整合（关键步骤）
 ###############################################
 Human_counts %>%
   as.matrix() %>%
   as.data.frame() %>%
-  rownames_to_column(var = "GENE") %>%                  # 基因作为第一列
-  inner_join(Human_PSG, by = "GENE") %>%                # 合并基因 tau 数据
-  gather(CELL, count, -GENE, -TissueTau) %>%            # 转长格式
-  inner_join(Human_meta_data, by = "CELL") %>%          # 匹配细胞元信息
-  filter(count > 0) %>%                                 # 只保留有表达的细胞
+  rownames_to_column(var = "GENE") %>%                
+  inner_join(Human_PSG, by = "GENE") %>%               
+  gather(CELL, count, -GENE, -TissueTau) %>%           
+  inner_join(Human_meta_data, by = "CELL") %>%         
+  filter(count > 0) %>%                               
   filter(!is.na(TissueTau)) %>% 
   group_by(CELL, CELL_TYPE) %>%
   summarise(
@@ -68,9 +53,6 @@ Human_counts %>%
     MEDIAN = median(TissueTau)
   ) %>% 
   ungroup() -> Human_gathered
-
-###############################################
-### 4. 排序（按你示例保持一致）
 ###############################################
 Human_gathered$CELL_TYPE <- factor(
   Human_gathered$CELL_TYPE,
@@ -78,10 +60,6 @@ Human_gathered$CELL_TYPE <- factor(
              "Zygot", "Pachy", "Diplo", 
              "Dicty")
 )
-
-
-###############################################
-### 5. 绘图（与示例一致）
 ###############################################
 ggplot(Human_gathered) +
   geom_boxplot(aes(CELL_TYPE, MEDIAN, fill = CELL_TYPE), notch = TRUE) +
